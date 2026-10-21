@@ -87,3 +87,14 @@ test('[도전] null·undefined·boolean 자식은 버린다 ({cond && <X/>} 패�
   assert.equal(el.props.children.length, 1);
   assert.equal(el.props.children[0].props.nodeValue, 'ok');
 });
+
+test('배열 자식({items.map(...)})은 펼쳐서 형제로 만든다', () => {
+  const items = ['a', 'b'].map((x) => createElement('li', { key: x }, x));
+  const el = createElement('ul', null, createElement('li', null, 'first'), items, [null, ['c']]);
+  assert.equal(el.props.children.length, 4);
+  assert.deepEqual(
+    el.props.children.map((c) => c.key),
+    [null, 'a', 'b', null],
+  );
+  assert.equal(el.props.children[3].props.nodeValue, 'c');
+});

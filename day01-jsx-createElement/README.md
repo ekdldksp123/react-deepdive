@@ -190,31 +190,25 @@ props에 key가 있나? false
 **`'key' in props` 결과는 왜 다른가요?**
 
 - prod는 `false`입니다. key는 props가 아니라 Element 자체(`el.key`)에 붙습니다. React가 형제 목록을 비교(reconcile)할 때 쓰는 식별자이지, 컴포넌트에 넘기는 값이 아니기 때문입니다.
-- dev는 `true`지만 실제 값이 있는 게 아닙니다. React가 `props.key`에 경고용 getter를 심어 둔 것입니다. 접근하면 \`\`key `is not a prop` 경고를 띄우고 `undefined`를 돌려줍니다. (직접 접근해서 확인함)
+- dev는 `true`지만 실제 값이 있는 게 아닙니다. React가 `props.key`에 경고용 getter를 심어 둔 것입니다. 접근하면 `` `key` is not a prop `` 경고를 띄우고 `undefined`를 돌려줍니다. (직접 접근해서 확인함)
 - 그래서 자식 컴포넌트에서 key 값이 필요하면 `id` 같은 다른 이름의 prop으로 따로 넘겨야 합니다.
 
-**`
-
-$$
-typeof` 값은 무엇이고, 왜 Symbol인가요?**
+**`$$typeof` 값은 무엇이고, 왜 Symbol인가요?**
 
 - 값은 `Symbol(react.transitional.element)`입니다. React 18까지는 `Symbol(react.element)`였는데, React 19에서 이름이 바뀌었습니다. 버전이 섞인 Element가 조용히 동작하지 않고 바로 에러가 나게 하려는 것입니다.
-- Symbol을 쓰는 이유는 XSS 방어입니다. 서버가 돌려준 JSON을 실수로 `{data}`처럼 렌더해도 JSON에는 Symbol을 담을 수 없습니다. 그래서 공격자가 만든 객체가 Element로 인정받지 못하고, React는 `
-$$
-
-typeof`가 맞지 않는 객체를 Element로 렌더하지 않습니다.
+- Symbol을 쓰는 이유는 XSS 방어입니다. 서버가 돌려준 JSON을 실수로 `{data}`처럼 렌더해도 JSON에는 Symbol을 담을 수 없습니다. 그래서 공격자가 만든 객체가 Element로 인정받지 못하고, React는 `$$typeof`가 맞지 않는 객체를 Element로 렌더하지 않습니다.
 
 - 참고로 이 레포의 [createElement.js](./createElement.js)는 학습용이라 React 18 방식의 `Symbol.for('react.element')`를 씁니다.
 
 ### 구현 — createElement
 
-[createElement.js](./createElement.js)의 TODO를 채워 [테스트](./createElement.test.js)를 통과시킵니다.
+[createElement.js](./createElement.js)를 구현해 [테스트](./createElement.test.js)를 통과시켰습니다.
 
 ```bash
 npm test
 ```
 
-마지막 `[도전]` 테스트는 `{cond && [[ORCA_RICH_MD:4e5e306dab0919b74183e914dbfe898b:inline-html:%3CX%20%2F%3E]]}`가 `false`를 자식으로 넘길 때를 다룹니다.
+마지막 `[도전]` 테스트는 `{cond && <X />}`가 `false`를 자식으로 넘길 때를 다룹니다.
 
 ## 3. 정리 (15분, 설명하듯)
 

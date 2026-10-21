@@ -31,7 +31,9 @@ export function createElement(type, config, ...children) {
   // 구조 분해로 key를 떼어 내면 config 원본은 건드리지 않고 새 props 객체가 생긴다
   const { key = null, ...props } = config ?? {};
 
+  // {items.map(...)}처럼 배열로 들어온 자식은 펼쳐서 형제로 만든다
   props.children = children
+    .flat(Infinity)
     .filter((child) => !isEmptyChild(child))
     .map((child) => (typeof child === 'object' ? child : createTextElement(child)));
 
