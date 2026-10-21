@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath scripts/hooks",
     "test": "node --test",
     "day01:transform": "node day01-jsx-createElement/01-transform.js",
     "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js"
