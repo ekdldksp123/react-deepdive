@@ -1,0 +1,15 @@
+{
+  "name": "react-deepdive",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "day01:transform": "node day01-jsx-createElement/01-transform.js",
+    "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.7",
+    "@babel/preset-react": "^8.0.1",
+    "react": "^19.3.1"
+  }
+}
