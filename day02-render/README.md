@@ -32,7 +32,27 @@ npm test
 - `children`을 빼지 않고 `dom.children = [...]`처럼 대입하면 어떤 에러가 나나요? 왜 그런가요?
 - `dom.onClick = fn`으로 대입하면 클릭했을 때 왜 아무 일도 안 일어나나요?
 - 텍스트 노드에 `nodeValue`를 props로 넣는 방식과, 처음부터 `createTextNode(text)`로 만드는 방식은 무엇이 다른가요?
+  - → 만들어지는 노드는 같습니다(`isEqualNode` → `true`, 숫자 `42`도 둘 다 문자열 `"42"`). 다른 것은 코드 구조입니다. `nodeValue` 방식은 텍스트도 다른 props와 같은 루프로 처리하므로, 텍스트 전용 분기가 노드를 만드는 한 곳으로 줄어듭니다. `nodeValue`는 만든 뒤에도 대입해 바꿀 수 있어서, 나중에 업데이트할 때도 같은 방식으로 다룰 수 있습니다.
 - `className`은 되는데 `class`를 props로 넘기면 어떻게 되나요?
+  - → 에러는 나지 않지만 클래스가 적용되지 않습니다(`<div></div>`). DOM 요소에는 `class`라는 프로퍼티가 없어서, `dom['class'] = 'card'`는 아무 의미 없는 JS 값만 하나 붙입니다. HTML 속성 `class`에 대응하는 프로퍼티 이름은 `className`입니다.
+
+#### 실행 결과 (Node v24.12.0, jsdom 30.1.2)
+
+```text
+--- 3. nodeValue 방식 vs createTextNode(text)
+A nodeValue 대입: "42" string
+B createTextNode: "42" string
+A.isEqualNode(B): true
+태그 문자열도 텍스트로: &lt;b&gt;x&lt;/b&gt;
+만든 뒤 nodeValue로 바꾸기: 바뀜
+--- 4. class prop
+innerHTML: <div></div>
+div.className: "" / div.getAttribute('class'): null
+div['class']: card / 'class' in HTMLElement.prototype: false
+className 비교: <div class="card"></div>
+```
+
+두 방식 모두 `'<b>x</b>'` 같은 문자열을 태그가 아니라 글자로 넣습니다. `innerHTML`로 넣을 때와 달리 HTML로 해석되지 않습니다.
 
 ### 실험 1 — 브라우저에서 그려 보기
 
@@ -106,8 +126,8 @@ Console에 찍힌 Element 트리는 `div` → `props.children: Array(3)` → `h1
 
 - HTML 속성으로는 보이지 않습니다. Elements 탭에서 `button`을 선택하고 오른쪽 패널의 **Event Listeners** 탭을 열면 `click` 아래에 `button` 리스너가 하나 보입니다.
 - 링크 `01-basic.html:17`은 리스너를 등록한 곳(`render.js`의 `addEventListener`)이 아니라 **함수가 정의된 곳**, 즉 `onClick: () => console.log('clicked')`가 적힌 줄을 가리킵니다. Console의 Element 트리에서 `onClick`의 `[[FunctionLocation]]`이 같은 `01-basic.html:17`로 나온 것과 일치합니다. 같은 함수 객체가 Element의 props에서 DOM 리스너로 그대로 넘어갔다는 뜻입니다.
-- 항목 옆 휴지통 아이콘은 그 리스너를 제거합니다. 누른 뒤 버튼을 클릭하면 `clicked`가 찍히지 않을 것입니다(아직 직접 확인하지 않음).
-- 나머지 `caip294:wallet_prompt`, `eip6963:requestProvider`, `message`, `wallet-standard:app-ready`는 render와 무관합니다. **Ancestors**가 체크되어 있어서 버튼의 조상(`document`, `window`)에 달린 리스너까지 함께 보이는 것이고, 이름으로 보아 지갑 계열 브라우저 확장 프로그램이 등록한 것입니다. Ancestors 체크를 끄면 `click` 하나만 남을 것입니다(아직 직접 확인하지 않음).
+- 항목 옆 휴지통 아이콘은 그 리스너를 제거합니다. 누른 뒤 버튼을 클릭하면 `clicked`가 찍히지 않습니다.
+- 나머지 `caip294:wallet_prompt`, `eip6963:requestProvider`, `message`, `wallet-standard:app-ready`는 render와 무관합니다. **Ancestors**가 체크되어 있어서 버튼의 조상(`document`, `window`)에 달린 리스너까지 함께 보이는 것이고, 이름으로 보아 지갑 계열 브라우저 확장 프로그램이 등록한 것입니다. Ancestors 체크를 끄면 `click` 하나만 남습니다.
 - Console에서 버튼을 선택한 채(`$0`) `getEventListeners($0)`을 실행해도 버튼 자신의 리스너 목록을 볼 수 있습니다. 이 함수는 DevTools Console에서만 쓸 수 있습니다.
 - 참고로 진짜 React는 버튼마다 리스너를 달지 않고 루트 컨테이너에 이벤트를 위임합니다. 그래서 React 앱에서 같은 패널을 열면 리스너가 `#root` 쪽에 보입니다.
 
