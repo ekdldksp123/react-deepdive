@@ -6,11 +6,13 @@
     "prepare": "git config core.hooksPath scripts/hooks",
     "test": "node --test",
     "day01:transform": "node day01-jsx-createElement/01-transform.js",
-    "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js"
+    "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js",
+    "day02:serve": "node scripts/serve.js day02-render"
   },
   "devDependencies": {
     "@babel/core": "^8.0.7",
     "@babel/preset-react": "^8.0.1",
+    "jsdom": "30.1.2",
     "react": "^19.3.1"
   }
 }

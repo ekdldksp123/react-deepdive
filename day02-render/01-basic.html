@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8" />
+<title>2일차 — render 기본</title>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    // render 구현 후 실행할 것. DevTools Elements 탭에서 만들어진 DOM을 확인한다.
+    import { createElement } from '../day01-jsx-createElement/createElement.js';
+    import { render } from './render.js';
+
+    const element = createElement(
+      'div',
+      { id: 'app', className: 'card' },
+      createElement('h1', null, '안녕, render'),
+      createElement('p', null, '숫자도 텍스트가 된다: ', 42),
+      createElement('button', { onClick: () => console.log('clicked') }, '클릭'),
+    );
+
+    console.log('Element 트리:', element);
+    render(element, document.getElementById('root'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8" />
+<title>2일차 — 재귀 render가 메인 스레드를 막는지</title>
+<style>
+  #ball { width: 24px; height: 24px; border-radius: 50%; background: tomato; position: relative; }
+  #log { font-family: monospace; white-space: pre; }
+</style>
+<body>
+  <p>공이 JS(requestAnimationFrame)로 움직입니다. 버튼을 누른 동안 공이 멈추는지 보세요.</p>
+  <div id="ball"></div>
+  <p>
+    <label>행 개수 <input id="rows" type="number" value="20000" step="5000" /></label>
+    <button id="go">한 번에 그리기</button>
+  </p>
+  <div id="log"></div>
+  <div id="root"></div>
+  <script type="module">
+    import { createElement } from '../day01-jsx-createElement/createElement.js';
+    import { render } from './render.js';
+
+    const ball = document.getElementById('ball');
+    const log = document.getElementById('log');
+    const print = (line) => (log.textContent += line + '\n');
+
+    // 프레임 사이 간격을 재서 가장 길게 끊긴 구간을 기록한다 (60fps면 약 16.7ms)
+    let last = performance.now();
+    let worstGap = 0;
+    (function tick(now) {
+      worstGap = Math.max(worstGap, now - last);
+      last = now;
+      ball.style.left = `${(now / 5) % 300}px`;
+      requestAnimationFrame(tick);
+    })(last);
+
+    // 50ms 넘게 메인 스레드를 잡은 작업(Long Task)을 브라우저가 알려 준다
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) print(`Long Task: ${entry.duration.toFixed(0)}ms`);
+    }).observe({ type: 'longtask' });
+
+    document.getElementById('go').addEventListener('click', () => {
+      const count = Number(document.getElementById('rows').value);
+      const rows = Array.from({ length: count }, (_, i) =>
+        createElement('li', null, createElement('b', null, `#${i}`), ' row'),
+      );
+
+      worstGap = 0;
+      const start = performance.now();
+      render(createElement('ul', null, ...rows), document.getElementById('root'));
+      print(`${count}행 render: ${(performance.now() - start).toFixed(0)}ms`);
+
+      // 다음 프레임 몇 개를 지나서 가장 긴 프레임 간격을 출력
+      setTimeout(() => print(`가장 긴 프레임 간격: ${worstGap.toFixed(0)}ms`), 500);
+    });
+  </script>
+</body>
+</html>

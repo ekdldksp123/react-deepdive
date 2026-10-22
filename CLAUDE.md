@@ -12,8 +12,8 @@
 ## 새 일차 추가
 
 1. `dayNN-topic/` 폴더 (예: `day02-render`). README 구조는 `day01-jsx-createElement/README.md`를 따른다.
-2. package.json에 `dayNN:*` 스크립트 추가.
-3. 테스트는 `*.test.js`로 두면 `npm test`(`node --test`)가 모든 일차를 함께 돌린다. 테스트 의존성은 추가하지 않는다(`node:test`만).
+2. package.json에 `dayNN:*` 스크립트 추가. 브라우저 실험 페이지는 `node scripts/serve.js dayNN-topic`으로 띄운다(`file://`에서는 ES 모듈이 막힘).
+3. 테스트는 `*.test.js`로 두면 `npm test`(`node --test`)가 모든 일차를 함께 돌린다. 테스트 러너는 `node:test`만 쓴다. DOM이 필요한 테스트는 jsdom(버전 고정)으로 `globalThis.document`를 만든다.
 4. 루트 README 진행 표에 한 줄 추가.
 
 ## 커밋

@@ -20,3 +20,4 @@ npm test            # 모든 날짜의 테스트 실행
 | 일차 | 날짜 | 주제 | 폴더 |
 | --- | --- | --- | --- |
 | 1 | 2026-10-20 (화) | JSX와 createElement | [day01-jsx-createElement](./day01-jsx-createElement) |
+| 2 | 2026-10-21 (수) | 렌더링 기초 | [day02-render](./day02-render) |
