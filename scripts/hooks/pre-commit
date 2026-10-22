@@ -7,3 +7,9 @@ case "$email" in
     exit 1
     ;;
 esac
+
+# 스테이징된 README의 편집기 서식 깨짐을 막는다 (고치기는 npm run check -- --fix)
+readmes=$(git diff --cached --name-only --diff-filter=ACM | grep 'README\.md$' || true)
+if [ -n "$readmes" ]; then
+  node scripts/check-readme.js --staged $readmes || exit 1
+fi
