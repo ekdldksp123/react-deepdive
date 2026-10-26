@@ -7,7 +7,7 @@ import { TEXT_ELEMENT } from '../day01-jsx-createElement/createElement.js';
 const isEvent = (name) => /^on[A-Z]/.test(name);
 const toEventType = (name) => name.slice(2).toLowerCase(); // onClick → click
 
-function setProp(dom, name, value) {
+export function setProp(dom, name, value) {
   if (isEvent(name)) {
     // dom.onClick = fn은 아무 의미 없는 속성일 뿐이라 리스너로 등록해야 한다
     dom.addEventListener(toEventType(name), value);

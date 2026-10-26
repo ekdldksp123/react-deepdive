@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8" />
+<title>3일차 — 재귀 render vs Fiber workLoop</title>
+<style>
+  #ball { width: 24px; height: 24px; border-radius: 50%; background: tomato; position: relative; }
+  #log { font-family: monospace; white-space: pre; }
+</style>
+<body>
+  <p>공이 JS(requestAnimationFrame)로 움직입니다. 두 버튼을 각각 눌러(사이에 새로고침) 공이 멈추는지 비교하세요.</p>
+  <div id="ball"></div>
+  <p>
+    <label>노드 수 <input id="nodes" type="number" value="400000" step="400000" /></label>
+    <button id="stack">재귀 render (2일차)</button>
+    <button id="fiber">Fiber render (3일차)</button>
+  </p>
+  <div id="log"></div>
+  <div id="root"></div>
+  <script type="module">
+    import { createElement } from '../day01-jsx-createElement/createElement.js';
+    import { render as stackRender } from '../day02-render/render.js';
+    import { render as fiberRender } from './fiber.js';
+
+    const ball = document.getElementById('ball');
+    const log = document.getElementById('log');
+    const print = (line) => (log.textContent += line + '\n');
+
+    let last = performance.now();
+    let worstGap = 0;
+    (function tick(now) {
+      worstGap = Math.max(worstGap, now - last);
+      last = now;
+      ball.style.left = `${(now / 5) % 300}px`;
+      requestAnimationFrame(tick);
+    })(last);
+
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) print(`Long Task: ${entry.duration.toFixed(0)}ms`);
+    }).observe({ type: 'longtask' });
+
+    // li 하나 = li, b, 텍스트 2개 → 노드 4개
+    function bigTree() {
+      const count = Math.round(Number(document.getElementById('nodes').value) / 4);
+      const rows = Array.from({ length: count }, (_, i) =>
+        createElement('li', null, createElement('b', null, `#${i}`), ' row'),
+      );
+      return createElement('ul', null, ...rows);
+    }
+
+    // fiber.js가 부르는 requestIdleCallback을 감싸서, workLoop가 몇 번 나눠 돌았는지 센다
+    const ric = window.requestIdleCallback.bind(window);
+    let slices = 0;
+    let rescheduled = false;
+    let start = 0;
+    window.requestIdleCallback = (cb) => {
+      rescheduled = true;
+      return ric((deadline) => {
+        slices++;
+        rescheduled = false;
+        const remaining = deadline.timeRemaining();
+        cb(deadline);
+        if (slices <= 3) print(`  workLoop #${slices}: 시작 시 timeRemaining ${remaining.toFixed(1)}ms`);
+        if (!rescheduled) {
+          print(`Fiber 완료: workLoop ${slices}번, 시작부터 ${(performance.now() - start).toFixed(0)}ms`);
+          setTimeout(() => print(`가장 긴 프레임 간격: ${worstGap.toFixed(0)}ms`), 500);
+        }
+      });
+    };
+
+    document.getElementById('stack').addEventListener('click', () => {
+      const tree = bigTree();
+      worstGap = 0;
+      start = performance.now();
+      stackRender(tree, document.getElementById('root'));
+      print(`재귀 render: ${(performance.now() - start).toFixed(0)}ms`);
+      setTimeout(() => print(`가장 긴 프레임 간격: ${worstGap.toFixed(0)}ms`), 500);
+    });
+
+    document.getElementById('fiber').addEventListener('click', () => {
+      const tree = bigTree();
+      worstGap = 0;
+      slices = 0;
+      start = performance.now();
+      try {
+        fiberRender(tree, document.getElementById('root'));
+      } catch (e) {
+        print(`Fiber render: ${e.message} (fiber.js의 TODO를 먼저 채우세요)`);
+      }
+    });
+  </script>
+</body>
+</html>

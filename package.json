@@ -8,7 +8,8 @@
     "check": "node scripts/check-readme.js",
     "day01:transform": "node day01-jsx-createElement/01-transform.js",
     "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js",
-    "day02:serve": "node scripts/serve.js day02-render"
+    "day02:serve": "node scripts/serve.js day02-render",
+    "day03:serve": "node scripts/serve.js day03-fiber"
   },
   "devDependencies": {
     "@babel/core": "^8.0.7",

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8" />
+<title>3일차 — requestIdleCallback vs MessageChannel</title>
+<style>
+  #log { font-family: monospace; white-space: pre; }
+</style>
+<body>
+  <p>각 방식으로 콜백을 1초 동안 계속 다시 예약하고, 몇 번 불렸는지 셉니다.</p>
+  <p>
+    <label><input id="busy" type="checkbox" /> 매 프레임 메인 스레드를 12ms씩 점유 (바쁜 페이지 흉내)</label>
+    <button id="go">1초씩 측정</button>
+  </p>
+  <div id="log"></div>
+  <script type="module">
+    const log = document.getElementById('log');
+    const print = (line) => (log.textContent += line + '\n');
+
+    // 바쁜 페이지: 프레임마다 12ms 동안 아무것도 못 하게 막는다
+    (function frame() {
+      if (document.getElementById('busy').checked) {
+        const end = performance.now() + 12;
+        while (performance.now() < end);
+      }
+      requestAnimationFrame(frame);
+    })();
+
+    // schedule(cb)로 계속 다시 예약하며 1초 동안 몇 번 불리는지 센다
+    function measure(name, schedule) {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        // 간격을 배열에 모았다가 Math.max(...gaps)로 펼치면 13만 개쯤에서 RangeError가 나서 바로 최대값만 남긴다
+        let count = 0;
+        let maxGap = 0;
+        let prev = start;
+        (function run() {
+          const now = performance.now();
+          count++;
+          maxGap = Math.max(maxGap, now - prev);
+          prev = now;
+          if (now - start < 1000) return schedule(run);
+          const extra = name === 'requestIdleCallback' ? ` / ${timeRemaining()}` : '';
+          print(`${name.padEnd(20)} ${String(count).padStart(6)}회, 최대 간격 ${maxGap.toFixed(1)}ms${extra}`);
+          resolve();
+        })();
+      });
+    }
+
+    let remaining = [];
+    const timeRemaining = () => {
+      const r = remaining.filter((x) => x > 0);
+      const out = `timeRemaining 최소 ${Math.min(...r).toFixed(1)} 최대 ${Math.max(...r).toFixed(1)}ms`;
+      remaining = [];
+      return out;
+    };
+
+    const channel = new MessageChannel();
+    let onMessage;
+    channel.port1.onmessage = () => onMessage();
+
+    const go = document.getElementById('go');
+    go.addEventListener('click', async () => {
+      // 측정끼리 겹치면 콜백을 나눠 먹어 숫자가 섞이므로, 끝날 때까지 버튼을 막는다
+      go.disabled = true;
+      print(`--- 바쁨: ${document.getElementById('busy').checked ? '켬' : '끔'}`);
+      await measure('requestIdleCallback', (run) =>
+        requestIdleCallback((d) => {
+          remaining.push(d.timeRemaining());
+          run();
+        }),
+      );
+      await measure('MessageChannel', (run) => {
+        onMessage = run;
+        channel.port2.postMessage(null);
+      });
+      await measure('setTimeout(0)', (run) => setTimeout(run, 0));
+      go.disabled = false;
+    });
+  </script>
+</body>
+</html>
