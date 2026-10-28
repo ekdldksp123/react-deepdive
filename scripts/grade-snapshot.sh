@@ -11,7 +11,10 @@ readme="$day/README.md"
 
 dir="$(git rev-parse --git-dir)/deepdive-grade"
 mkdir -p "$dir"
-hash=$(sed -n '/^## 3\. 정리/,$p' "$readme" | shasum | cut -d' ' -f1)
+# 편집기·check --fix가 바꾸는 줄 끝 공백, 끝 빈 줄, 끝 줄바꿈 유무는 내용 변경으로 보지 않는다
+hash=$(sed -n '/^## 3\. 정리/,$p' "$readme" \
+  | awk '{ sub(/[[:space:]]+$/, ""); line[NR] = $0 } END { n = NR; while (n > 0 && line[n] == "") n--; for (i = 1; i <= n; i++) print line[i] }' \
+  | shasum | cut -d' ' -f1)
 saved="$(stat -f '%Sm' -t '%Y-%m-%d %H:%M:%S' "$readme")"
 
 if [ "$2" = "--save" ]; then
