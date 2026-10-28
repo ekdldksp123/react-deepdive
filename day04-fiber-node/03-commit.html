@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8" />
+<title>4일차 — 바로 붙이기 vs commit 한 번에 붙이기</title>
+<style>
+  #ball { width: 24px; height: 24px; border-radius: 50%; background: tomato; position: relative; }
+  #log { font-family: monospace; white-space: pre; }
+</style>
+<body>
+  <p>두 버튼을 각각 눌러(사이에 새로고침) 그리는 동안 화면에 붙은 <code>li</code> 개수가 어떻게 늘어나는지 비교하세요.</p>
+  <div id="ball"></div>
+  <p>
+    <label>노드 수 <input id="nodes" type="number" value="400000" step="400000" /></label>
+    <button id="step4">fiber마다 바로 붙이기 (3일차)</button>
+    <button id="step5">commit에서 한 번에 (4일차)</button>
+  </p>
+  <div id="log"></div>
+  <div id="root"></div>
+  <script type="module">
+    import { createElement } from '../day01-jsx-createElement/createElement.js';
+    import { render as renderStep4 } from '../day03-fiber/fiber.js';
+    import { render as renderStep5 } from './fiber.js';
+
+    const ball = document.getElementById('ball');
+    const root = document.getElementById('root');
+    const log = document.getElementById('log');
+    const print = (line) => (log.textContent += line + '\n');
+
+    (function tick(now) {
+      ball.style.left = `${(now / 5) % 300}px`;
+      requestAnimationFrame(tick);
+    })(performance.now());
+
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) print(`Long Task: ${entry.duration.toFixed(0)}ms`);
+    }).observe({ type: 'longtask' });
+
+    // li 하나 = li, b, 텍스트 2개 → 노드 4개
+    function bigTree() {
+      const count = Math.round(Number(document.getElementById('nodes').value) / 4);
+      const rows = Array.from({ length: count }, (_, i) =>
+        createElement('li', null, createElement('b', null, `#${i}`), ' row'),
+      );
+      return { count, tree: createElement('ul', null, ...rows) };
+    }
+
+    // 200ms마다 화면에 붙은 li 개수를 찍고, 다 붙으면 멈춘다
+    function watch(count, start) {
+      const timer = setInterval(() => {
+        const shown = root.firstChild?.childElementCount ?? 0;
+        print(`${(performance.now() - start).toFixed(0)}ms: 화면의 li ${shown} / ${count}`);
+        if (shown === count) clearInterval(timer);
+      }, 200);
+    }
+
+    function run(render, label) {
+      const { count, tree } = bigTree();
+      const start = performance.now();
+      try {
+        render(tree, root);
+        watch(count, start);
+      } catch (e) {
+        print(`${label}: ${e.message} (fiber.js의 TODO를 먼저 채우세요)`);
+      }
+    }
+
+    document.getElementById('step4').addEventListener('click', () => run(renderStep4, '3일차'));
+    document.getElementById('step5').addEventListener('click', () => run(renderStep5, '4일차'));
+  </script>

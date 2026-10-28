@@ -9,7 +9,10 @@
     "day01:transform": "node day01-jsx-createElement/01-transform.js",
     "day01:inspect": "node day01-jsx-createElement/02-inspect-element.js",
     "day02:serve": "node scripts/serve.js day02-render",
-    "day03:serve": "node scripts/serve.js day03-fiber"
+    "day03:serve": "node scripts/serve.js day03-fiber",
+    "day04:tree": "node day04-fiber-node/01-fiber-tree.js",
+    "day04:alternate": "node day04-fiber-node/02-alternate.js",
+    "day04:serve": "node scripts/serve.js day04-fiber-node"
   },
   "devDependencies": {
     "@babel/core": "^8.0.7",

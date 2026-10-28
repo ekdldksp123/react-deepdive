@@ -22,3 +22,4 @@ npm test            # 모든 날짜의 테스트 실행
 | 1 | 2026-10-20 (화) | JSX와 createElement | [day01-jsx-createElement](./day01-jsx-createElement) |
 | 2 | 2026-10-21 (수) | 렌더링 기초 | [day02-render](./day02-render) |
 | 3 | 2026-10-22 (목) | 왜 Fiber인가 | [day03-fiber](./day03-fiber) |
+| 4 | 2026-10-23 (금) | Fiber 노드 구조 | [day04-fiber-node](./day04-fiber-node) |
