@@ -12,12 +12,23 @@
     "day03:serve": "node scripts/serve.js day03-fiber",
     "day04:tree": "node day04-fiber-node/01-fiber-tree.js",
     "day04:alternate": "node day04-fiber-node/02-alternate.js",
-    "day04:serve": "node scripts/serve.js day04-fiber-node"
+    "day04:serve": "node scripts/serve.js day04-fiber-node",
+    "day05:restart": "node day05-render-commit/01-restart.js",
+    "day05:strict": "node day05-render-commit/02-strict-mode.js",
+    "day06:diff": "node day06-reconciliation/01-diff.js",
+    "day06:key": "node day06-reconciliation/02-react-key.js",
+    "day07:pipeline": "node day07-review/01-pipeline.js",
+    "day08:tree": "node day08-function-component/01-function-fiber.js",
+    "day09:order": "node day09-use-state/01-hook-order.js",
+    "day09:react": "node day09-use-state/02-react-state.js",
+    "day10:timing": "node day10-use-effect/01-effect-timing.js",
+    "day10:react": "node day10-use-effect/02-react-effects.js"
   },
   "devDependencies": {
     "@babel/core": "^8.0.7",
     "@babel/preset-react": "^8.0.1",
     "jsdom": "30.1.2",
-    "react": "^19.3.1"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }
