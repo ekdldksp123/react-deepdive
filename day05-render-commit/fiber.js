@@ -98,5 +98,6 @@ export function commitRoot() {
  * 옛 트리를 모두 떼어 낸(null) 다음에 새 트리를 붙인다(dom). forEachFiber를 쓰면 된다.
  */
 export function commitRefs(oldRoot, newRoot) {
-  throw new Error('not implemented');
+  if (oldRoot) forEachFiber(oldRoot, (fiber) => fiber.props.ref?.(null));
+  forEachFiber(newRoot, (fiber) => fiber.props.ref?.(fiber.dom));
 }
